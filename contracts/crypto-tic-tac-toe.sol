@@ -9,13 +9,6 @@ contract CryptoTicTacToe{
         uint256 thirdIndex;
     }
     
-    struct MatchResult{
-        int8[9] board;
-        address winner;
-        bool isDraw;
-        string message;
-    }
-    
     // Public Game State Variables
     bool public isGameFinished;
     address public playerO;
@@ -34,7 +27,7 @@ contract CryptoTicTacToe{
     WinningCase private winnerCase;
     
     // Constructor
-    constructor (address _playerO, address _playerX) public{
+    constructor (address _playerO, address _playerX) public {
         // Initialize game variables
         gameOwner = msg.sender;
         playerO = _playerO;
@@ -69,23 +62,18 @@ contract CryptoTicTacToe{
     }
     
     // Attempt to make a move
-    function makeMove (uint8 _index) public returns (MatchResult memory result) {
-        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == -1 && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
+    function makeMove (uint8 _index) public {
+        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == emptySpace && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
         gameBoard[_index] = (currentPlayer == playerO ? moveO : moveX);
         currentPlayer = (currentPlayer == playerO ? playerX : playerO);
-        MatchResult memory result = MatchResult(gameBoard, address(0), false, "");
+
         if (isBoardFull()){
             isGameFinished = true;
-            result.isDraw = true;
-            result.message = "It's a Draw!";
         }
         else if (hasWinner()){
             isGameFinished = true;
-            result.winner = getWinnerAddress();
-            result.isDraw = false;
-            result.message = "Game Finished!";
+            lastWinner = getWinnerAddress();
         }
-        return result;
     }
     
     // Check for a win
@@ -93,7 +81,7 @@ contract CryptoTicTacToe{
         for (uint i = 0; i < winningCases.length; i++) {
             WinningCase memory currentCase = winningCases[i];
             uint256 firstIndex = currentCase.firstIndex; uint256 secondIndex = currentCase.secondIndex; uint256 thirdIndex = currentCase.thirdIndex;
-            if (gameBoard[firstIndex] == gameBoard[secondIndex] && gameBoard[secondIndex] == gameBoard[thirdIndex]){
+            if (gameBoard[firstIndex] == gameBoard[secondIndex] && gameBoard[secondIndex] == gameBoard[thirdIndex] && gameBoard[firstIndex] != emptySpace){
                 winnerCase = currentCase;
                 return true;
             }
