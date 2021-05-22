@@ -70,7 +70,7 @@ contract CryptoTicTacToe{
     
     // Attempt to make a move
     function makeMove (uint8 _index) public returns (MatchResult memory result) {
-        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == -1 && !isGameFinished), "Error: Cannot make move.");
+        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == -1 && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
         gameBoard[_index] = (currentPlayer == playerO ? moveO : moveX);
         currentPlayer = (currentPlayer == playerO ? playerX : playerO);
         MatchResult memory result = MatchResult(gameBoard, address(0), false, "");
@@ -85,7 +85,7 @@ contract CryptoTicTacToe{
             result.isDraw = false;
             result.message = "Game Finished!";
         }
-        
+        return result;
     }
     
     // Check for a win
