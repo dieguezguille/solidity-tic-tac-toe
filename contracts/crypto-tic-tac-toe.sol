@@ -1,12 +1,12 @@
 pragma solidity ^0.8.4;
 
-contract CryptoTicTacToe{
+contract CryptoTicTacToe {
     
     // Structs
-    struct WinningCase{
-        uint256 firstIndex;
-        uint256 secondIndex;
-        uint256 thirdIndex;
+    struct WinningCase {
+        uint firstIndex;
+        uint secondIndex;
+        uint thirdIndex;
     }
     
     // Public Game State Variables
@@ -17,17 +17,19 @@ contract CryptoTicTacToe{
     address public gameOwner;
     address public lastWinner;
     
-    // Private Game State Varibales
-    int8 private emptySpace = -1;
-    int8 private moveO = 0;
-    int8 private moveX = 1;
-    int8[9] private emptyBoard = [-1, -1, -1, -1, -1, -1, -1, -1, -1];
+    // Constants
+    int8 private constant emptySpace = -1;
+    int8 private constant moveO = 0;
+    int8 private constant moveX = 1;
+    
+    // Private Variables
+    int8[9] private emptyBoard = [emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace];
     int8[9] private gameBoard = int8[9](emptyBoard);
     WinningCase[] private winningCases;
     WinningCase private winnerCase;
     
     // Constructor
-    constructor (address _playerO, address _playerX) public {
+    constructor (address _playerO, address _playerX) public{
         // Initialize game variables
         gameOwner = msg.sender;
         playerO = _playerO;
@@ -35,12 +37,47 @@ contract CryptoTicTacToe{
         currentPlayer = playerO;
         createWinningCases();
     }
-        
-    // Show actual board state
+
+    // PUBLIC CALLABLE METHODS
+    // Attempt to make a move
+    function makeMove (uint8 _index) public {
+        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == emptySpace && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
+        gameBoard[_index] = (currentPlayer == playerO ? moveO : moveX);
+        currentPlayer = (currentPlayer == playerO ? playerX : playerO);
+        if (isBoardFull()){
+            isGameFinished = true;
+        }
+        else if (hasWinner()){
+            isGameFinished = true;
+            lastWinner = getWinnerAddress();
+        }
+    }
+     // Show actual board state
     function getBoard() public view returns (int8[9] memory) {
         return gameBoard;
     }
     
+    // Attempt to change players
+    function changePlayers(address _playerO, address _playerX) public {
+        require (msg.sender == gameOwner, "Error: Only gameOwner can call changePlayers function");
+        playerO = _playerO;
+        playerX = _playerX;
+    }
+    
+    // Attempt to change ownership
+    function changeOwner(address _newOwner) public {
+        require (msg.sender == gameOwner, "Error: Only gameOwner can call changeOwner function.");
+        gameOwner = _newOwner;
+    }
+    
+    // Reset game state
+    function resetGame() public {
+        require (msg.sender == gameOwner, "Error: Only gameOwner can call resetGame function.");
+        isGameFinished = false;
+        gameBoard = emptyBoard;
+    }
+    
+    // PRIVATE HELPER METHODS
     // Create and add winning cases
     function createWinningCases() private {
         WinningCase memory case1 = WinningCase(0, 1, 2);
@@ -61,26 +98,13 @@ contract CryptoTicTacToe{
         winningCases.push(case8);
     }
     
-    // Attempt to make a move
-    function makeMove (uint8 _index) public {
-        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == emptySpace && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
-        gameBoard[_index] = (currentPlayer == playerO ? moveO : moveX);
-        currentPlayer = (currentPlayer == playerO ? playerX : playerO);
-
-        if (isBoardFull()){
-            isGameFinished = true;
-        }
-        else if (hasWinner()){
-            isGameFinished = true;
-            lastWinner = getWinnerAddress();
-        }
-    }
-    
     // Check for a win
     function hasWinner() private returns (bool) {
         for (uint i = 0; i < winningCases.length; i++) {
             WinningCase memory currentCase = winningCases[i];
-            uint256 firstIndex = currentCase.firstIndex; uint256 secondIndex = currentCase.secondIndex; uint256 thirdIndex = currentCase.thirdIndex;
+            uint firstIndex = currentCase.firstIndex;
+            uint secondIndex = currentCase.secondIndex;
+            uint thirdIndex = currentCase.thirdIndex;
             if (gameBoard[firstIndex] == gameBoard[secondIndex] && gameBoard[secondIndex] == gameBoard[thirdIndex] && gameBoard[firstIndex] != emptySpace){
                 winnerCase = currentCase;
                 return true;
@@ -95,23 +119,10 @@ contract CryptoTicTacToe{
         return winnerCase.firstIndex == 0 ? playerO : playerX;
     }
     
-    // Attempt to change players
-    function changePlayers(address _playerO, address _playerX) public {
-        require (msg.sender == gameOwner, "Error: Only gameOwner can call changePlayers function");
-        playerO = _playerO;
-        playerX = _playerX;
-    }
-    
-    // Attempt to change ownership
-    function changeOwner(address _newOwner) public {
-        require (msg.sender == gameOwner, "Error: Only gameOwner can call changeOwner function.");
-        gameOwner = _newOwner;
-    }
-    
-    // Helper methods
+    // Check if board is full
     function isBoardFull() private view returns (bool) {
         for (uint i = 0; i < gameBoard.length ; i++){
-            if (gameBoard[i] == -1){
+            if (gameBoard[i] == emptySpace){
                 return false;
             }
         }
