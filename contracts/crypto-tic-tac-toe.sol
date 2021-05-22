@@ -18,18 +18,18 @@ contract CryptoTicTacToe {
     address public lastWinner;
     
     // Constants
-    int8 private constant emptySpace = -1;
-    int8 private constant moveO = 0;
-    int8 private constant moveX = 1;
+    int8 private constant EMPTY_MOVE = -1;
+    int8 private constant O_MOVE = 0;
+    int8 private constant X_MOVE = 1;
     
     // Private Variables
-    int8[9] private emptyBoard = [emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace];
+    int8[9] private emptyBoard = [EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE, EMPTY_MOVE];
     int8[9] private gameBoard = int8[9](emptyBoard);
     WinningCase[] private winningCases;
     WinningCase private winnerCase;
     
     // Constructor
-    constructor (address _playerO, address _playerX) public{
+    constructor (address _playerO, address _playerX) public {
         // Initialize game variables
         gameOwner = msg.sender;
         playerO = _playerO;
@@ -41,8 +41,8 @@ contract CryptoTicTacToe {
     // PUBLIC CALLABLE METHODS
     // Attempt to make a move
     function makeMove (uint8 _index) public {
-        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == emptySpace && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
-        gameBoard[_index] = (currentPlayer == playerO ? moveO : moveX);
+        require ((_index >= 0 && _index <= 9 && msg.sender == currentPlayer && gameBoard[_index] == EMPTY_MOVE && !isGameFinished), "Error: Cannot place a move. Make sure the input is valid.");
+        gameBoard[_index] = (currentPlayer == playerO ? O_MOVE : X_MOVE);
         currentPlayer = (currentPlayer == playerO ? playerX : playerO);
         if (isBoardFull()){
             isGameFinished = true;
@@ -105,7 +105,7 @@ contract CryptoTicTacToe {
             uint firstIndex = currentCase.firstIndex;
             uint secondIndex = currentCase.secondIndex;
             uint thirdIndex = currentCase.thirdIndex;
-            if (gameBoard[firstIndex] == gameBoard[secondIndex] && gameBoard[secondIndex] == gameBoard[thirdIndex] && gameBoard[firstIndex] != emptySpace){
+            if (gameBoard[firstIndex] == gameBoard[secondIndex] && gameBoard[secondIndex] == gameBoard[thirdIndex] && gameBoard[firstIndex] != EMPTY_MOVE){
                 winnerCase = currentCase;
                 return true;
             }
@@ -122,7 +122,7 @@ contract CryptoTicTacToe {
     // Check if board is full
     function isBoardFull() private view returns (bool) {
         for (uint i = 0; i < gameBoard.length ; i++){
-            if (gameBoard[i] == emptySpace){
+            if (gameBoard[i] == EMPTY_MOVE){
                 return false;
             }
         }
