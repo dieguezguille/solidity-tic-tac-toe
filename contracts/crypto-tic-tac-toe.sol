@@ -18,7 +18,7 @@ contract CryptoTicTacToe {
     address public lastWinner;
     
     // Constants
-    int8 private constant EMPTY_MOVE = -1;
+    int8 private constant EMPTY_MOVE = 3;
     int8 private constant O_MOVE = 0;
     int8 private constant X_MOVE = 1;
     
@@ -29,7 +29,7 @@ contract CryptoTicTacToe {
     WinningCase private winnerCase;
     
     // Constructor
-    constructor (address _playerO, address _playerX) public {
+    constructor (address _playerO, address _playerX) public{
         // Initialize game variables
         gameOwner = msg.sender;
         playerO = _playerO;
@@ -75,6 +75,7 @@ contract CryptoTicTacToe {
         require (msg.sender == gameOwner, "Error: Only gameOwner can call resetGame function.");
         isGameFinished = false;
         gameBoard = emptyBoard;
+        currentPlayer = playerO;
     }
     
     // PRIVATE HELPER METHODS
